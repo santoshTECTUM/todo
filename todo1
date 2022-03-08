@@ -1,0 +1,117 @@
+import { handle } from 'express/lib/application';
+import React, { useState, useRef } from 'react';
+// import react from 'react'
+import Header from '../../components/Headers/Header'
+import list from 'api/cntlist'
+
+import { Table } from 'reactstrap';
+const Todo = () => {
+    const [todoitem, setTodoitem] = useState('');
+    const [dataNew, setDataNew] = useState("");
+
+    const [todolist, setTodolist] = useState([
+        { name: 'sa' }, { name: 'san' }
+    ])
+
+    // console.log("------------------datanew", dataNew);
+
+
+    const handleChange = (e) => {
+        setDataNew(e.target.value);
+    }
+    const clearState = () => {
+        setDataNew();
+    }
+    const add = () => {
+        const item = { name: dataNew }
+        const arraylist = [...todolist, item]
+        setTodolist(arraylist);
+        clearState();
+    }
+    const addPrevent = (e) => {
+        e.preventDefault();
+        add();
+        tableList();
+    }
+
+    const deleteItem = (e) => {
+        console.log("aaa", e);
+        setTodolist(todolist.filter((item) => {
+            console.log("Delete", item.name)
+            return item.name !== e;
+        }));
+    }
+
+
+
+
+    const tableList = async () => {
+        const list1 = await list({
+
+            "device_id": 2,
+            "limit": 10,
+            "offset": 0
+        })
+        console.log("list1", list1.data)
+
+    }
+
+
+    const data = todolist.map((item) => (
+        <li className='m-1' >   {item.name}
+            <button className='ml-4' onClick={() => deleteItem(item.name)} >Delete</button>
+        </li>
+    ))
+    const [imgData, setImgData] = useState(null);
+    // const [picture, setPicture] = useState(null);
+    const [show, setShow] = useState(false)
+
+   
+
+
+    const imageChangeHandler = (e) => {
+        //     e.preventDefault();
+        //     console.log("image", e.target.files[0].name)
+        // setImgData = e.target.files[0].name
+
+        if (e.target.files[0]) {
+            console.log("picture: ", e.target.files);
+         
+            const reader = new FileReader();
+            reader.addEventListener("load", () => {
+                setImgData(reader.result);
+                setShow(true)
+            });
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    }
+    const deleteImg = (e) => {
+
+        setImgData('');
+        setShow(false);
+        window.location.reload(true);
+
+    }
+    return (
+        <>
+            <Header />
+            <h1>Simple React TO-DO list</h1>
+            <div>
+                <input
+
+                    type="file"
+                    onChange={imageChangeHandler}
+                />
+                {show !== false ? <img style={{ width: "20%", height: "20%" }} src={imgData} /> : ""} {show !== false ? <span  ><button onClick={deleteImg}> Delete</button></span> : ""}
+            </div>
+            <form >
+                <br />
+                <input type="text" name='newlist' onChange={handleChange}></input>
+                <button onClick={addPrevent}>Add list</button>
+            </form>
+            <ul>{data}</ul>
+        </>
+    )
+
+}
+export default Todo
